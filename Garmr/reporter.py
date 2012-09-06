@@ -1,4 +1,4 @@
-
+import json
 
 class Reporter():
     reporters = {}
@@ -14,13 +14,13 @@ class Reporter():
     def start_actives(self):
         return None
 
-    def write_active(self, test):
+    def write_active(self, test, result):
         return None
 
     def start_passives(self):
         return None
 
-    def write_passive(self, target):
+    def write_passive(self, test, result):
         return None
 
     def end_passives(self):
@@ -32,13 +32,17 @@ class Reporter():
     def end_targets(self):
         return None
 
-    def end_report(self):
+    def end_report(self, results):
         return "This reporter is unimplemented!"
 
 class DetailReporter(Reporter):
     # TODO Implement detailed reporter
-    def end_report(self):
+    def end_report(self, results):
         return "This reporter should emit an XML report that includes all of the the details for each test, including captured data"
+
+class JsonReporter(Reporter):
+ def end_report(self, results):
+  return json.dumps(results, indent = 2)
 
 class AntXmlReporter(Reporter):
 
@@ -107,8 +111,8 @@ class AntXmlReporter(Reporter):
         self.report += "</testsuites>\n"
         return None
 
-    def end_report(self):
+    def end_report(self, results):
         return self.report
 
 Reporter.reporters['xml'] = AntXmlReporter()
-
+Reporter.reporters['json'] = JsonReporter()
