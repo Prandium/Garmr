@@ -42,7 +42,7 @@ class DetailReporter(Reporter):
 
 class JsonReporter(Reporter):
  def end_report(self, results):
-  return json.dumps(results, indent = 2)
+  return json.dumps(results, indent = 2, default = str)
 
 class AntXmlReporter(Reporter):
 
