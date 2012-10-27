@@ -25,7 +25,7 @@ def main():
         'Topic :: Software Development :: Testing',
         'Topic :: Software Development :: Libraries',
         'Programming Language :: Python'],
-     install_requires= ['requests>=0.6.2']
+     install_requires= ['requests>=0.6.2','BeautifulSoup==3.2.1']
  )
 
 
