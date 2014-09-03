@@ -1,5 +1,6 @@
 from urlparse import urlparse, urljoin
 import requests
+import re
 from scanner import ActiveTest, PassiveTest, HtmlTest, Scanner
 
 class HttpOnlyAttributePresent(PassiveTest):
@@ -54,12 +55,28 @@ class StrictTransportSecurityIncludeSubDomainsPresent(PassiveTest):
     secure_only = True
     description = "Check if the Strict-Transport-Security includeSubDomains header option is present in TLS requests."
     def analyze(self, response):
-        stsheader = "includeSubDomains"
-        sts = stsheader in response.headers
-        if sts == False:
-            result = self.result("Fail", "Strict-Transport-Security header not found.", None)
+        stsheader = "Strict-Transport-Security"
+        stsoptionheader = "includeSubDomains"
+        if [x for x in response.headers.values() if stsoptionheader in x] and stsheader in response.headers:
+            result = self.result("Pass", "Strict-Transport-Security includeSubDomains header option present.", response.headers[stsheader])
         else:
-            result = self.result("Pass", "Strict-Transport-Security header present.", response.headers[stsheader])
+            result = self.result("Fail", "Strict-Transport-Security includeSubDomains header option not found.", None)
+        return result
+
+class StrictTransportSecurityMaxAgeLength(PassiveTest):
+    secure_only = True
+    description = "Check if the Strict-Transport-Security max-age is long enough."
+    def analyze(self, response):
+        stsheader = "Strict-Transport-Security"
+        if stsheader in response.headers:
+            m = re.search('[0-9]+', response.headers["strict-transport-security"])
+            stsmaxage = int(m.group(0))
+            if stsmaxage >= 15552000: # this checks if the max-age is greater than 180 days, ~6 months
+                result = self.result("Pass", "Strict-Transport-Security max-age is long enough.", response.headers[stsheader])
+            else:
+                result = self.result("Fail", "Strict-Transport-Security max-age is too short.", None)
+        else:
+            result = self.result("Fail", "Strict-Transport-Security header not present.", None)
         return result
 
 class XFrameOptionsPresent(PassiveTest):
@@ -252,6 +269,8 @@ def configure(scanner):
     scanner.register_check(Http200Check)
     scanner.register_check(WebTouch)
     scanner.register_check(StrictTransportSecurityPresent)
+    scanner.register_check(StrictTransportSecurityIncludeSubDomainsPresent)
+    scanner.register_check(StrictTransportSecurityMaxAgeLength)
     scanner.register_check(XFrameOptionsPresent)
     scanner.register_check(StsRedirectCheck)
     scanner.register_check(HttpOnlyAttributePresent)
