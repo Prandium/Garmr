@@ -50,6 +50,18 @@ class StrictTransportSecurityPresent(PassiveTest):
             result = self.result("Pass", "Strict-Transport-Security header present.", response.headers[stsheader])
         return result
 
+class StrictTransportSecurityIncludeSubDomainsPresent(PassiveTest):
+    secure_only = True
+    description = "Check if the Strict-Transport-Security includeSubDomains header option is present in TLS requests."
+    def analyze(self, response):
+        stsheader = "includeSubDomains"
+        sts = stsheader in response.headers
+        if sts == False:
+            result = self.result("Fail", "Strict-Transport-Security header not found.", None)
+        else:
+            result = self.result("Pass", "Strict-Transport-Security header present.", response.headers[stsheader])
+        return result
+
 class XFrameOptionsPresent(PassiveTest):
     description = "Check if X-Frame-Options header is present."
     def analyze(self, response):

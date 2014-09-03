@@ -74,7 +74,9 @@ class ActiveTest():
     def execute(self, url, predecessor=None):
         self.url = url
         if self.url not in self.sessions or self.new_session:
-            self.sessions[url] = requests.session() # Create per-target session
+            sess = requests.session() # Create per-target session
+            sess.headers.update({'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:31.0) Gecko/20100101 Firefox/31.0'})
+            self.sessions[url] = sess
         try:
             if "pred" in getargspec(self.do_test).args:
                 resulttuple = self.do_test(url, predecessor)
